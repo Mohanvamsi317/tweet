@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Like;
 use App\Models\Idea;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
@@ -13,7 +15,10 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $ideas=Idea::all();
+        $ideas=Idea::join('users', 'users.id', '=', 'ideas.user_id')
+        ->select('ideas.*', 'users.profile_pic as profile_pic')
+        ->orderby('created_at')   // select chat data and sender's name
+        ->get();
         return view('dashboard', ['ideas'=>$ideas]);
     }
 
@@ -33,12 +38,12 @@ class DashboardController extends Controller
         $idea = new Idea();
         $idea->content = $request->tweet_content;
         $idea->user_id = $user->id;
-        $idea->name=$user->name;
+        $idea->name = $user->name;
         $idea->save();
-
-        
+    
         return redirect()->route('dashboard')->with('success', 'Post created successfully!');
     }
+    
 
     public function destroy($id){
         //$ide=Idea::where('id',$id)->first();
@@ -117,6 +122,40 @@ class DashboardController extends Controller
 
     // Redirect back to the profile page with a success message
     return redirect()->route('profile')->with('success', 'Profile updated successfully.');
+}
+
+public function updatelikes(Request $request, $current_user, $current_post_id)
+{
+    $is_like = Like::where('user_id', $current_user)
+                    ->where('post_id',$current_post_id)
+                    ->first();
+    $like=Idea::find( $current_post_id);
+    if($is_like)
+    {
+        $is_like->delete();
+        $like->likes-=1;
+        $like->save();
+        return response()->json([
+            'message'=>'unliked',
+            'likes'=>$like->likes
+
+        ]);
+    }      
+    else
+    {
+        Like::insert([
+            'user_id'=> $current_user,
+            'post_id'=> $current_post_id
+        ]);
+        $like->likes+=1;    
+        $like->save();  
+        return response()->json([
+            'message'=>'liked',
+            'likes'=>$like->likes
+        ]);
+    }        
+
+
 }
 
 }

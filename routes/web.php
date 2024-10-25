@@ -33,6 +33,10 @@ Route::group(['middleware' => 'admin'], function () {
     Route::get('/chat/{friendId}/messages', [ChatController::class, 'getMessages'])->name('chat.messages');
 
     Route::post('/chat/{friend}/send', [ChatController::class, 'send'])->name('chat.send');
+
+
+    Route::post('/updatelike/{user_id}/{post_id}', [DashboardController::class, 'updatelikes']);
+
 });
 
 require __DIR__.'/auth.php';

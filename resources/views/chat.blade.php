@@ -5,7 +5,7 @@
     <h3>Friends</h3>
     @foreach($friends as $friend)
         <div class="friend-card" onclick="openChat('{{ $friend->id }}', '{{ $friend->name }}')"> <!-- Pass both ID and name -->
-            <img src="{{ $friend->profile_image_url }}" alt="{{ $friend->name }}">
+            <img src="{{ asset('storage/'. $friend->profile_pic) }}" alt="{{ $friend->name }}">
             <h5>{{ $friend->name }}</h5>
         </div>
     @endforeach
